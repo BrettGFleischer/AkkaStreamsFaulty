@@ -43,7 +43,7 @@ namespace AkkaStreamsFaulty.Origin.Actors
                     .To(sink)
                     .Run(Context.System.Materializer())
                     //I suspect the issue is within the "PipeTo" method, The remote actor never receives the "MeasurementsSinkReady" message
-                    .PipeTo(DataSourceActorRef, success: sinkRef => new MeasurementsSinkReady(prepare.Id, sinkRef));
+                    .PipeTo(Sender, success: sinkRef => new MeasurementsSinkReady(prepare.Id, sinkRef));
             });
 
         }
