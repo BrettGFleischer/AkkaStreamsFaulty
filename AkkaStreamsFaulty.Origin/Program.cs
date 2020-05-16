@@ -9,13 +9,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Akka.Streams.Dsl;
 
 namespace AkkaStreamsFaulty.Origin
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             ColourConsole.WriteLineYellow("Creating ReceiverActorSystem");
             ActorSystem system = ActorSystem.Create("ReceiverActorSystem");
@@ -25,10 +24,13 @@ namespace AkkaStreamsFaulty.Origin
 
             ActorMaterializer materializer = system.Materializer();
 
-            var ready = await receiver.Ask<MeasurementsSinkReady>(new PrepareUpload(121), timeout: TimeSpan.FromSeconds(30));
-            Source.From(Enumerable.Range(1, 100))
-                .Select(i => i.ToString())
-                .RunWith(ready.SinkRef.Sink, materializer);
+            using (system)
+            {
+                using (materializer)
+                {
+                    MeasurementsSinkReady ready = receiver.Ask<MeasurementsSinkReady>(new PrepareUpload(121)).Result;//, timeout: TimeSpan.FromSeconds(30)).Result;
+                }
+            }
 
             Console.ReadLine();
         }
